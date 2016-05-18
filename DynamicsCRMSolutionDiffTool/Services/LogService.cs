@@ -9,7 +9,13 @@ namespace DiffTool.Services
         public void Info(string message)
         {
             SetColor(ConsoleColor.Blue);
+            Write(message);
+        }
 
+        public void Message(string message)
+        {
+            SetColor(ConsoleColor.White);
+            Write(message);
         }
 
         public void Error(string message, Exception exception = null)
