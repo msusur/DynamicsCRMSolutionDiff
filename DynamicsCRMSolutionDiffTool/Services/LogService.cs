@@ -44,5 +44,10 @@ namespace DiffTool.Services
             Console.ResetColor();
             Console.ForegroundColor = color;
         }
+
+        public void Append(string message)
+        {
+            Write(message);
+        }
     }
 }
