@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Diagnostics.Eventing;
-using System.Drawing;
 
 namespace DiffTool.Services
 {
@@ -8,7 +6,7 @@ namespace DiffTool.Services
     {
         public void Info(string message)
         {
-            SetColor(ConsoleColor.Blue);
+            SetColor(ConsoleColor.Green);
             Write(message);
         }
 
@@ -36,7 +34,8 @@ namespace DiffTool.Services
 
         private void Write(string message)
         {
-            Console.WriteLine(message);
+            Console.WriteLine($"** {message}");
+            Console.WriteLine();
         }
 
         private void SetColor(ConsoleColor color)
@@ -47,7 +46,7 @@ namespace DiffTool.Services
 
         public void Append(string message)
         {
-            Write(message);
+            Console.Write(message);
         }
     }
 }
