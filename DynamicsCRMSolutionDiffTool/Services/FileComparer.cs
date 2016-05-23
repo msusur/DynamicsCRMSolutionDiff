@@ -3,6 +3,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using DiffTool.Model;
+using DiffTool.Services.Comparers;
 
 namespace DiffTool.Services
 {
@@ -10,6 +11,11 @@ namespace DiffTool.Services
     {
         private readonly LogService _log;
         private readonly Dictionary<string, string> _fileHashList = new Dictionary<string, string>();
+        private readonly List<ICompareStrategy> _compareStrategies = new List<ICompareStrategy>
+        {
+            new ControlIfNewStrategy(),
+            new ControlIfChangedStrategy()
+        };
 
         public FileComparer(FileInfo[] sourceFiles, LogService log)
         {
@@ -42,13 +48,14 @@ namespace DiffTool.Services
 
         public CompareResult With(FileInfo[] targetFiles)
         {
-            var targetHashlist = new Dictionary<string,string>();
+            var targetHashlist = new Dictionary<string, string>();
             CreateIndex(targetFiles, targetHashlist);
-            var compare = new CompareResult();
+            var compareResult = new CompareResult();
             foreach (var targetFile in targetFiles)
             {
-                
+                _compareStrategies.ForEach(s => s.Compare(_fileHashList, targetHashlist, targetFile, compareResult));
             }
+            return compareResult;
         }
     }
 }

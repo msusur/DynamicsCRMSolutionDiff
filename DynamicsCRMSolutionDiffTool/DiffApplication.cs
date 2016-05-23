@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
+using System.Runtime.InteropServices;
+using System.Text;
 using DiffTool.Model;
 using DiffTool.Services;
 
@@ -23,11 +25,16 @@ namespace DiffTool
                     throw new Exception(Strings.ShowHelp);
                 }
 
-                Log.Info($"Comparing '{arguments.SourceFile}' with '{arguments.TargetFile}'");
+                Log.Info($"Comparing solutions;\r\n\t'{arguments.SourceFile}'\r\n\t'{arguments.TargetFile}'");
 
                 helper = new PackageHelper(arguments, Log);
                 helper.Extract();
                 CompareResult result = helper.Compare();
+                if (result.Files.Count == 0)
+                {
+                    Log.Warn("No changes were found!!");
+                }
+                result.Files.OrderBy(c => c.DiffType).ToList().ForEach(LogChanges);
             }
             catch (Exception ex)
             {
@@ -35,12 +42,28 @@ namespace DiffTool
             }
             finally
             {
-                if (helper != null)
-                {
-                    helper.Clear();
-                }
+                helper?.Clear();
             }
+            Log.Info("Done! (Press any key to continue)");
             Console.ReadLine();
+        }
+
+        private static void LogChanges(FileInfoContainer change)
+        {
+            StringBuilder message = new StringBuilder();
+            switch (change.DiffType)
+            {
+                case FileDiffTypes.Changed:
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    message.Append("*");
+                    break;
+                case FileDiffTypes.New:
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                    message.Append("+");
+                    break;
+            }
+            message.Append($" {change.FileInfo.FullName}");
+            Console.WriteLine(message);
         }
     }
 }

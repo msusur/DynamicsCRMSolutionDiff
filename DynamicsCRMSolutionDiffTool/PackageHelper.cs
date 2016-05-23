@@ -38,7 +38,7 @@ namespace DiffTool
             var targetFiles = targetDir.GetFiles("*.*", SearchOption.AllDirectories);
 
             FileComparer compare = new FileComparer(sourceFiles, _log);
-            compare.With(targetFiles);
+            compareResult = compare.With(targetFiles);
 
             return compareResult;
         }
@@ -61,10 +61,9 @@ namespace DiffTool
                 SingleComponent = "NONE"
             };
 
-            _log.Info($"Extracting the package '{filePath}' to temp location.");
+            _log.Info($"Extracting '{Path.GetFileName(filePath)}' to temp location.");
             SolutionPackager packager = new SolutionPackager(packagerArgs);
             packager.Run();
-            _log.Append("....Done.");
 
             return temp;
         }
@@ -73,10 +72,23 @@ namespace DiffTool
         {
             _log.Info("Deleting temp folders.");
 
-            Directory.Delete(_sourceTemp, true);
-            Directory.Delete(_targetTemp, true);
+            if (!string.IsNullOrEmpty(_sourceTemp) || !Directory.Exists(_sourceTemp))
+            {
+                Directory.Delete(_sourceTemp, true);
+            }
+            else
+            {
+                _log.Warn("Source temp folder not found. Skipping...");
+            }
 
-            _log.Append("........Done.");
+            if (!string.IsNullOrEmpty(_targetTemp) || !Directory.Exists(_targetTemp))
+            {
+                Directory.Delete(_targetTemp, true);
+            }
+            else
+            {
+                _log.Warn("Target temp folder not found. Skipping...");
+            }
         }
     }
 }

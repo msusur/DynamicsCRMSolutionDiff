@@ -13,7 +13,7 @@ namespace DiffTool.Services
         public void Message(string message)
         {
             SetColor(ConsoleColor.White);
-            Write(message);
+            Console.WriteLine($"{message}");
         }
 
         public void Error(string message, Exception exception = null)
@@ -34,7 +34,7 @@ namespace DiffTool.Services
 
         private void Write(string message)
         {
-            Console.WriteLine($"** {message}");
+            Console.WriteLine($"@{DateTime.Now.ToShortTimeString()}-{message}");
             Console.WriteLine();
         }
 
