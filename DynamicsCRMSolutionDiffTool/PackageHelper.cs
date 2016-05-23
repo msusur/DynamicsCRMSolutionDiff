@@ -28,8 +28,6 @@ namespace DiffTool
 
         public CompareResult Compare()
         {
-            var compareResult = new CompareResult();
-
             var sourceDir = new DirectoryInfo(_sourceTemp);
             var targetDir = new DirectoryInfo(_targetTemp);
 
@@ -37,8 +35,9 @@ namespace DiffTool
             var sourceFiles = sourceDir.GetFiles("*.*", SearchOption.AllDirectories);
             var targetFiles = targetDir.GetFiles("*.*", SearchOption.AllDirectories);
 
-            FileComparer compare = new FileComparer(sourceFiles, _log);
-            compareResult = compare.With(targetFiles);
+            FileComparer compare = new FileComparer(sourceFiles, _log, sourceDir.FullName, targetDir.FullName);
+            _log.Info("Comparing two folders for changes and newly added files.");
+            var compareResult = compare.With(targetFiles);
 
             return compareResult;
         }

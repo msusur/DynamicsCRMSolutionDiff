@@ -57,6 +57,7 @@
     <Compile Include="Services\Comparers\ControlIfNewStrategy.cs" />
     <Compile Include="Services\FileComparer.cs" />
     <Compile Include="Services\Comparers\ICompareStrategy.cs" />
+    <Compile Include="Services\IFileHelper.cs" />
     <Compile Include="Services\LogService.cs" />
     <Compile Include="Strings.cs" />
   </ItemGroup>

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -10,6 +11,8 @@ namespace DiffTool.Services
     public class FileComparer
     {
         private readonly LogService _log;
+        private readonly string _sourceDir;
+        private readonly string _targetDir;
         private readonly Dictionary<string, string> _fileHashList = new Dictionary<string, string>();
         private readonly List<ICompareStrategy> _compareStrategies = new List<ICompareStrategy>
         {
@@ -17,9 +20,11 @@ namespace DiffTool.Services
             new ControlIfChangedStrategy()
         };
 
-        public FileComparer(FileInfo[] sourceFiles, LogService log)
+        public FileComparer(FileInfo[] sourceFiles, LogService log, string sourceDir, string targetDir)
         {
             _log = log;
+            _sourceDir = sourceDir;
+            _targetDir = targetDir;
             Initialize(sourceFiles);
         }
 
@@ -27,11 +32,11 @@ namespace DiffTool.Services
         {
             _log.Info("Creating file index.");
             _fileHashList.Clear();
-            CreateIndex(sourceFiles, _fileHashList);
+            CreateIndex(sourceFiles, _fileHashList, _sourceDir); // create index for source
             _log.Info("Done.");
         }
 
-        private void CreateIndex(FileInfo[] sourceFiles, Dictionary<string, string> hashList)
+        private void CreateIndex(FileInfo[] sourceFiles, Dictionary<string, string> hashList, string folderRoot)
         {
             using (var md5 = MD5.Create())
             {
@@ -40,7 +45,7 @@ namespace DiffTool.Services
                     using (var fileStream = File.OpenRead(sourceFile.FullName))
                     {
                         var hash = md5.ComputeHash(fileStream);
-                        hashList.Add(sourceFile.FullName, Encoding.Default.GetString(hash));
+                        hashList.Add(sourceFile.FullName.Replace(folderRoot, string.Empty), Encoding.Default.GetString(hash));
                     }
                 }
             }
@@ -49,11 +54,13 @@ namespace DiffTool.Services
         public CompareResult With(FileInfo[] targetFiles)
         {
             var targetHashlist = new Dictionary<string, string>();
-            CreateIndex(targetFiles, targetHashlist);
+            CreateIndex(targetFiles, targetHashlist, _targetDir); //create index for target.
             var compareResult = new CompareResult();
             foreach (var targetFile in targetFiles)
             {
-                _compareStrategies.ForEach(s => s.Compare(_fileHashList, targetHashlist, targetFile, compareResult));
+                _compareStrategies.ForEach(s => s.Compare(_fileHashList, targetHashlist, targetFile, compareResult, 
+                    //this is what happens when you don't use your own file reference and use FileInfo instead.
+                    _sourceDir, _targetDir)); 
             }
             return compareResult;
         }

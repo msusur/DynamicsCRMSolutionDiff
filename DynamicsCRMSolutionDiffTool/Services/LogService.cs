@@ -1,41 +1,64 @@
 ﻿using System;
+using System.Text;
 
 namespace DiffTool.Services
 {
     public class LogService
     {
+        private readonly StringBuilder _logBuilder = new StringBuilder();
+        private readonly IFileHelper _fileHelper;
+
+        public LogService(IFileHelper fileHelper)
+        {
+            _fileHelper = fileHelper;
+        }
+
+        public LogService()
+            : this(new FileHelper())
+        {
+
+        }
+
         public void Info(string message)
         {
             SetColor(ConsoleColor.Green);
             Write(message);
         }
 
-        public void Message(string message)
+        public void Message(string message, ConsoleColor color = ConsoleColor.White)
         {
-            SetColor(ConsoleColor.White);
-            Console.WriteLine($"{message}");
+            SetColor(color);
+            Console.WriteLine(message);
+            LogOnly(message);
         }
 
         public void Error(string message, Exception exception = null)
         {
             SetColor(ConsoleColor.Red);
-            Write(message);
+            Write($"ERROR: {message}");
             if (exception != null)
             {
-                Write($"Error details:\r\n{exception.StackTrace}");
+                LogOnly($"Error details:\r\n{exception.StackTrace}");
             }
         }
 
         public void Warn(string message)
         {
             SetColor(ConsoleColor.Yellow);
-            Write(message);
+            Write($"WARNING: {message}");
+        }
+
+        private void LogOnly(string message)
+        {
+            _logBuilder.AppendLine(message);
         }
 
         private void Write(string message)
         {
-            Console.WriteLine($"@{DateTime.Now.ToShortTimeString()}-{message}");
+            message = $"@{DateTime.Now.ToShortTimeString()}-{message}";
+            Console.WriteLine(message);
             Console.WriteLine();
+            LogOnly(message);
         }
 
         private void SetColor(ConsoleColor color)
@@ -44,9 +67,13 @@ namespace DiffTool.Services
             Console.ForegroundColor = color;
         }
 
-        public void Append(string message)
+        public void Flush(string logFilePath)
         {
-            Console.Write(message);
+            if (string.IsNullOrEmpty(logFilePath))
+            {
+                return;
+            }
+            _fileHelper.SaveToFile(logFilePath, _logBuilder.ToString());
         }
     }
 }

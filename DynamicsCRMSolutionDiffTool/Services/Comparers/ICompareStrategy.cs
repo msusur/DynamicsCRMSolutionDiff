@@ -6,6 +6,6 @@ namespace DiffTool.Services.Comparers
 {
     public interface ICompareStrategy
     {
-        void Compare(Dictionary<string, string> sourceHash, Dictionary<string, string> targetHashlist, FileInfo targetFile, CompareResult compareResult);
+        void Compare(Dictionary<string, string> sourceHash, Dictionary<string, string> targetHashlist, FileInfo targetFile, CompareResult compareResult, string sourceDir, string targetDir);
     }
 }
